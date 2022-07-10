@@ -1,0 +1,30 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "debug",
+      "type": "shell",
+      "command": "nim",
+      "args": [
+        "c",
+        "--debuginfo:on",
+        "--outdir:${workspaceFolder}/bin",
+        "${workspaceFolder}/src/main.nim"
+      ]
+    },
+    {
+      "label": "release",
+      "type": "shell",
+      "command": "nim",
+      "args": [
+        "c",
+        "-d:release",
+        "-d:lto",
+        "--outdir:${workspaceFolder}/bin/release",
+        "${workspaceFolder}/src/main.nim"
+      ]
+    }
+  ]
+}
