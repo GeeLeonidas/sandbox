@@ -34,7 +34,7 @@ proc `-`*(a, b: DirtyFloat): DirtyFloat =
   a + (-b)
 
 proc `*=`*(a: var DirtyFloat, b: DirtyFloat) =
-  a.value += b.value
+  a.value *= b.value
   a.dirty = true
 
 proc `*`*(a, b: DirtyFloat): DirtyFloat =
