@@ -11,7 +11,7 @@
         "c",
         "--debuginfo:on",
         "--outdir:${workspaceFolder}/bin",
-        "${workspaceFolder}/src/main.nim"
+        "${file}"
       ]
     },
     {
@@ -23,7 +23,7 @@
         "-d:release",
         "-d:lto",
         "--outdir:${workspaceFolder}/bin/release",
-        "${workspaceFolder}/src/main.nim"
+        "${file}"
       ]
     }
   ]
