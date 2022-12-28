@@ -11,9 +11,9 @@ converter toFloat*(dfloat: DirtyFloat): float = dfloat.value
 
 proc isDirty*(self: DirtyFloat): bool = self.dirty
 
-proc clean*(self: var DirtyFloat; sigDigits = static[int](7)) =
-  self.value = round(self.value, sigDigits)
-  self.dirty = false
+proc clean*(self: DirtyFloat; sigDigits = static[int](7)): DirtyFloat =
+  result.value = round(self.value, sigDigits)
+  result.dirty = false
 
 proc `+=`*(a: var DirtyFloat, b: DirtyFloat) =
   a.value += b.value

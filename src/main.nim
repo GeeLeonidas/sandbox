@@ -2,14 +2,20 @@ import dfloat
 
 when isMainModule:
   const
-    N = 100_000
-    A = 33333.33333'df
+    N = 10_000
+    A = 3.333'df
   var testNum = 0'df
 
   for i in 1..N:
     testNum += A # I love float imprecision
-    if testNum.isDirty: # Just a prototype, not necessary
-      clean(testNum) # Mitigates, but doesn't solve the problem
 
-  echo toFloat(A) * N
-  echo toFloat(testNum)
+  let
+    rightValue = toFloat(A) * N
+    obtainedValue = toFloat(clean testNum)
+    dirtyValue = toFloat(testNum)
+
+  echo rightValue
+  echo obtainedValue
+  echo rightValue == obtainedValue
+  echo dirtyValue
+  echo rightValue == dirtyValue
