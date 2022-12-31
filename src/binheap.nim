@@ -5,8 +5,8 @@ type
     (x < y) is bool
     (x <= y) is bool
     (x == y) is bool
-    high(x) is int
-    low(x) is int
+    high(typeof(x)) is int
+    low(typeof(x)) is int
   BinaryHeap[O: bool, T: Comparable] = object 
     raw: ptr UncheckedArray[T]
     capacity: Positive
@@ -28,7 +28,7 @@ proc `=copy`[O, T](x: var BinaryHeap[O, T], y: BinaryHeap[O, T]) =
   x.raw = createU(UncheckedArray[T], y.capacity * sizeof(T))
   moveMem(x.raw, y.raw, y.capacity)
 
-proc heapify*[O, T](heap: var BinaryHeap[O, T], start: Natural) =
+proc heapify[O, T](heap: var BinaryHeap[O, T], start: Natural) =
   let
     left  = 2 * start + 1
     right = 2 * start + 2
@@ -51,3 +51,14 @@ proc heapify*[O, T](heap: var BinaryHeap[O, T], start: Natural) =
     heap.raw[start] = heap.raw[fittest]
     heap.raw[fittest] = temp
     heapify(heap, fittest)
+
+proc swapHead*[O, T](heap: var BinaryHeap[O, T], newHead: T): T =
+  result = heap.raw[0]
+  heap.raw[0] = newHead
+  heapify(heap, 0)
+
+proc popHead*[O, T](heap: var BinaryHeap[O, T]): T =
+  when O: # MaxHeap
+    heap.swapHead(min(T))
+  else: # MinHeap
+    heap.swapHead(max(T))
