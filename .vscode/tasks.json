@@ -9,7 +9,7 @@
       "command": "nim",
       "args": [
         "c",
-        "--debuginfo:on",
+        "--debugger:native",
         "--outdir:${workspaceFolder}/bin",
         "${file}"
       ]
