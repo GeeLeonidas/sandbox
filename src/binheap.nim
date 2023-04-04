@@ -59,6 +59,6 @@ proc swapHead*[O, T](heap: var BinaryHeap[O, T], newHead: T): T =
 
 proc popHead*[O, T](heap: var BinaryHeap[O, T]): T =
   when O: # MaxHeap
-    heap.swapHead(min(T))
+    heap.swapHead(low(T))
   else: # MinHeap
-    heap.swapHead(max(T))
+    heap.swapHead(high(T))
