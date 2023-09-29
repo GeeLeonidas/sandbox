@@ -5,13 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "lldb",
+      "type": "gdb",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/bin/${fileBasenameNoExtension}",
+      "target": "./bin/${fileBasenameNoExtension}",
       "preLaunchTask": "debug",
-      "args": [],
-      "cwd": "${workspaceFolder}"
+      "cwd": "${workspaceRoot}",
+      "valuesFormatting": "parseText"
     }
   ]
 }

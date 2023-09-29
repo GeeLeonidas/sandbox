@@ -6,24 +6,20 @@
     {
       "label": "debug",
       "type": "shell",
-      "command": "nim",
+      "command": "nimble",
       "args": [
-        "c",
-        "--debugger:native",
-        "--outdir:${workspaceFolder}/bin",
-        "${file}"
+        "build",
+        "--debugger:native"
       ]
     },
     {
       "label": "release",
       "type": "shell",
-      "command": "nim",
+      "command": "nimble",
       "args": [
-        "c",
+        "build",
         "-d:release",
-        "-d:lto",
-        "--outdir:${workspaceFolder}/bin/release",
-        "${file}"
+        "-d:lto"
       ]
     }
   ]
