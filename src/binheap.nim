@@ -1,13 +1,15 @@
 import std / options
 
 type
-  Comparable = concept x, y
+  Comparable = concept x, y, type T
+    x is T
+    y is T
     (x < y) is bool
     (x <= y) is bool
     (x == y) is bool
-    high(typeof(x)) is int
-    low(typeof(x)) is int
-  BinaryHeap[O: bool, T: Comparable] = object 
+    high(T) is T
+    low(T) is T
+  BinaryHeap[O: static[bool], T: Comparable] = object 
     raw: ptr UncheckedArray[T]
     capacity: Positive
   MaxHeap[T: Comparable] = BinaryHeap[true, T]
@@ -52,6 +54,25 @@ proc heapify[O, T](heap: var BinaryHeap[O, T], start: Natural) =
     heap.raw[fittest] = temp
     heapify(heap, fittest)
 
+proc insert*[O, T](heap: var BinaryHeap[O, T], newItem: T) =
+  var
+    idx = block:
+      var res = 0
+      while res < heap.capacity:
+        if heap.raw[res] == (when O: low(T) else: high(T)):
+          break
+        inc res
+      when not defined(danger):
+        if res == heap.capacity:
+          raise newException(IndexDefect, "the binary heap is full")
+      res
+    parentIdx = (idx - 1) div 2
+  heap.raw[idx] = newItem
+  while idx > 0:
+    heapify(heap, parentIdx)
+    idx = parentIdx
+    parentIdx = (idx - 1) div 2
+  
 proc swapHead*[O, T](heap: var BinaryHeap[O, T], newHead: T): T =
   result = heap.raw[0]
   heap.raw[0] = newHead
@@ -62,3 +83,11 @@ proc popHead*[O, T](heap: var BinaryHeap[O, T]): T =
     heap.swapHead(low(T))
   else: # MinHeap
     heap.swapHead(high(T))
+
+when isMainModule:
+  var heap = newBinaryHeapOfCap[true, int](16)
+  heap.insert(4)
+  heap.insert(8)
+  discard heap.popHead()
+  echo heap.popHead()
+  
