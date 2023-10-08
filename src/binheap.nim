@@ -17,7 +17,7 @@ type
 
 proc newBinaryHeapOfCap*[O, T](capacity: Positive): BinaryHeap[O, T] =
   result = BinaryHeap[O, T](capacity: capacity)
-  result.raw = createU(UncheckedArray[T], capacity)
+  result.raw = cast[ptr UncheckedArray[T]](alloc capacity * sizeof(T))
   for i in 0 ..< result.capacity:
     result.raw[i] = when O: low(T) else: high(T)
 
@@ -27,7 +27,7 @@ proc `=destroy`[O, T](x: var BinaryHeap[O, T]) =
 
 proc `=copy`[O, T](x: var BinaryHeap[O, T], y: BinaryHeap[O, T]) =
   x = BinaryHeap[O, T](capacity: y.capacity)
-  x.raw = createU(UncheckedArray[T], y.capacity * sizeof(T))
+  x.raw = cast[ptr UncheckedArray[T]](alloc y.capacity * sizeof(T))
   moveMem(x.raw, y.raw, y.capacity)
 
 proc heapify[O, T](heap: var BinaryHeap[O, T], start: Natural) =
