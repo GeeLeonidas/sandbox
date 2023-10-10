@@ -48,10 +48,15 @@ proc `[]`[T: Loadable](table: PaginatedTable[T], selectedKey: string): T =
 type TextData = distinct string
 
 proc loadByKey(_: typedesc[TextData], key: string): TextData =
+  echo "Hey!"
   key.TextData
+
+proc `$`(t: TextData): string = t.string
 
 
 when isMainModule:
   randomize()
   echo TextData is Loadable
   echo not compiles(initPaginatedTable[int]())
+  var table = initPaginatedTable[TextData]()
+  echo table["This key doesn't exist!"]
