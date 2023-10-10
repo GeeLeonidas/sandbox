@@ -4,7 +4,7 @@ type
   Loadable = concept x, type T
     x is T
     loadByKey(T, string) is T
-  PaginatedTable[T] = object
+  PaginatedTable[T: Loadable] = object
     loaded: Table[string, T]
     access: Table[string, MonoTime]
     threshold: range[0..high(int)]
