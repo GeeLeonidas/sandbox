@@ -1,4 +1,4 @@
-import std / [tables, monotimes]
+import std / [tables, monotimes, random]
 
 type
   Loadable = concept x, type T
@@ -19,7 +19,13 @@ proc `[]`[T: Loadable](table: PaginatedTable[T], key: string): T =
       var
         lowKey: string
         lowAccess = low(MonoTime)
+        idxKey: string
+        idx = -1
+      let randIdx = rand 0..<table.access.len
       for key, access in table.access:
+        inc idx
+        if unlikely(randIdx == idx):
+          idxKey = key
         if unlikely(lowAccess == low(MonoTime)):
           lowKey = key
           lowAccess = access
@@ -31,7 +37,9 @@ proc `[]`[T: Loadable](table: PaginatedTable[T], key: string): T =
         table.access.del key
         table.loaded.del key
       else:
-        discard # TODO: random key deletion
+        assert idx >= 0, "Couldn't select an entry from PaginatedTable to delete"
+        table.access.del idxKey
+        table.loaded.del idxKey
     table.loaded[key] = T.loadByKey key
   table.access[key] = getMonoTime()
   table.loaded[key]
@@ -44,5 +52,6 @@ proc loadByKey(_: typedesc[TextData], key: string): TextData =
 
 
 when isMainModule:
+  randomize()
   echo TextData is Loadable
   echo not compiles(initPaginatedTable[int]())
