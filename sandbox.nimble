@@ -8,7 +8,7 @@ description = "Programming experiments written in Nim"
 license     = "MIT"
 srcDir      = "src"
 binDir      = "bin"
-bin         = @["binheap", "dfloat", "ring"]
+bin         = @["binheap", "dfloat", "ring", "paginated"]
 
 
 # Dependencies
