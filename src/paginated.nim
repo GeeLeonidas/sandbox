@@ -13,8 +13,8 @@ proc initPaginatedTable[T: Loadable]: PaginatedTable[T] =
   result.loaded = initTable[string, T]()
   result.access = initTable[string, MonoTime]()
 
-proc `[]`[T: Loadable](table: PaginatedTable[T], key: string): T =
-  if unlikely(not table.loaded.hasKey key):
+proc `[]`[T: Loadable](table: PaginatedTable[T], selectedKey: string): T =
+  if unlikely(not table.loaded.hasKey selectedKey):
     if sizeof(table) > table.threshold:
       var
         lowKey: string
@@ -34,15 +34,15 @@ proc `[]`[T: Loadable](table: PaginatedTable[T], key: string): T =
           lowKey = key
           lowAccess = access
       if lowAccess > low(MonoTime):
-        table.access.del key
-        table.loaded.del key
+        table.access.del lowKey
+        table.loaded.del lowKey
       else:
         assert idx >= 0, "Couldn't select an entry from PaginatedTable to delete"
         table.access.del idxKey
         table.loaded.del idxKey
-    table.loaded[key] = T.loadByKey key
-  table.access[key] = getMonoTime()
-  table.loaded[key]
+    table.loaded[selectedKey] = T.loadByKey selectedKey
+  table.access[selectedKey] = getMonoTime()
+  table.loaded[selectedKey]
 
 
 type TextData = distinct string
