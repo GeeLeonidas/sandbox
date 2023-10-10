@@ -9,11 +9,12 @@ type
     access: Table[string, MonoTime]
     threshold: range[0..high(int)]
 
-proc initPaginatedTable[T: Loadable]: PaginatedTable[T] =
+proc initPaginatedTable[T: Loadable](threshold = 2_097_152): PaginatedTable[T] =
   result.loaded = initTable[string, T]()
   result.access = initTable[string, MonoTime]()
+  result.threshold = threshold
 
-proc `[]`[T: Loadable](table: PaginatedTable[T], selectedKey: string): T =
+proc `[]`[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
   if unlikely(not table.loaded.hasKey selectedKey):
     if sizeof(table) > table.threshold:
       var
