@@ -8,7 +8,7 @@ type
     loaded: Table[string, tuple[value: T, access: MonoTime]]
     threshold, size: Positive
 
-proc initPaginatedTable*[T: Loadable](threshold = 1_048_576): PaginatedTable[T] =
+proc initPaginatedTable*[T: Loadable](threshold = 1000): PaginatedTable[T] =
   result.loaded = initTable[string, tuple[value: T, access: MonoTime]]()
   result.threshold = threshold
   result.size = sizeof result
@@ -59,11 +59,11 @@ when isMainModule:
   randomize()
   echo TextData is Loadable
   echo not compiles(initPaginatedTable[int]())
-  var table = initPaginatedTable[TextData](threshold = 100)
+  var table = initPaginatedTable[TextData](threshold = 1000)
   echo table["This key doesn't exist!"]
   echo table["This key doesn't exist!"] # But now it does!
   echo table.size
-  for i in 1..10:
-    echo table[$i]
+  for i in 1..100_000:
+    discard table[$i]
   echo table.size
   echo table["This key doesn't exist!"] # Now it doesn't :(
