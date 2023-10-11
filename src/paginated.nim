@@ -1,20 +1,21 @@
 import std / [tables, monotimes, random]
 
 type
-  Loadable = concept x, type T
+  Loadable* = concept x, type T
     x is T
     loadByKey(T, string) is T
-  PaginatedTable[T: Loadable] = object
+  PaginatedTable*[T: Loadable] = object
     loaded: Table[string, tuple[value: T, access: MonoTime]]
-    threshold: range[0..high(int)]
+    threshold, size: Positive
 
-proc initPaginatedTable[T: Loadable](threshold = 2_097_152): PaginatedTable[T] =
+proc initPaginatedTable*[T: Loadable](threshold = 1_048_576): PaginatedTable[T] =
   result.loaded = initTable[string, tuple[value: T, access: MonoTime]]()
   result.threshold = threshold
+  result.size = sizeof result
 
-proc `[]`[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
+proc `[]`*[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
   if unlikely(not table.loaded.hasKey selectedKey):
-    if sizeof(table) > table.threshold:
+    if table.size > table.threshold:
       var
         lowKey: string
         lowAccess = low(MonoTime)
@@ -37,7 +38,10 @@ proc `[]`[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
       else:
         assert idx >= 0, "Couldn't select an entry from PaginatedTable to delete"
         table.loaded.del idxKey
-    table.loaded[selectedKey] = (T.loadByKey selectedKey, low(MonoTime))
+    let newEntry = (T.loadByKey selectedKey, low(MonoTime))
+    if table.size <= table.threshold:
+      table.size += sizeof newEntry
+    table.loaded[selectedKey] = newEntry
   table.loaded[selectedKey].access = getMonoTime()
   table.loaded[selectedKey].value
 
@@ -55,7 +59,11 @@ when isMainModule:
   randomize()
   echo TextData is Loadable
   echo not compiles(initPaginatedTable[int]())
-  var table = initPaginatedTable[TextData]()
+  var table = initPaginatedTable[TextData](threshold = 100)
   echo table["This key doesn't exist!"]
   echo table["This key doesn't exist!"] # But now it does!
-  echo sizeof(table)
+  echo table.size
+  for i in 1..10:
+    echo table[$i]
+  echo table.size
+  echo table["This key doesn't exist!"] # Now it doesn't :(
