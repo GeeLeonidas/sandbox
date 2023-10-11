@@ -61,3 +61,5 @@ when isMainModule:
   echo not compiles(initPaginatedTable[int]())
   var table = initPaginatedTable[TextData]()
   echo table["This key doesn't exist!"]
+  echo table["This key doesn't exist!"] # But now it does!
+  echo sizeof(table)
