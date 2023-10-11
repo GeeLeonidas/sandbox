@@ -5,13 +5,11 @@ type
     x is T
     loadByKey(T, string) is T
   PaginatedTable[T: Loadable] = object
-    loaded: Table[string, T]
-    access: Table[string, MonoTime]
+    loaded: Table[string, tuple[value: T, access: MonoTime]]
     threshold: range[0..high(int)]
 
 proc initPaginatedTable[T: Loadable](threshold = 2_097_152): PaginatedTable[T] =
-  result.loaded = initTable[string, T]()
-  result.access = initTable[string, MonoTime]()
+  result.loaded = initTable[string, tuple[value: T, access: MonoTime]]()
   result.threshold = threshold
 
 proc `[]`[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
@@ -22,28 +20,26 @@ proc `[]`[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
         lowAccess = low(MonoTime)
         idxKey: string
         idx = -1
-      let randIdx = rand 0..<table.access.len
-      for key, access in table.access:
+      let randIdx = rand 0..<table.loaded.len
+      for key, entry in table.loaded:
         inc idx
         if unlikely(randIdx == idx):
           idxKey = key
         if unlikely(lowAccess == low(MonoTime)):
           lowKey = key
-          lowAccess = access
+          lowAccess = entry.access
           continue
-        if access < lowAccess:
+        if entry.access < lowAccess:
           lowKey = key
-          lowAccess = access
+          lowAccess = entry.access
       if lowAccess > low(MonoTime):
-        table.access.del lowKey
         table.loaded.del lowKey
       else:
         assert idx >= 0, "Couldn't select an entry from PaginatedTable to delete"
-        table.access.del idxKey
         table.loaded.del idxKey
-    table.loaded[selectedKey] = T.loadByKey selectedKey
-  table.access[selectedKey] = getMonoTime()
-  table.loaded[selectedKey]
+    table.loaded[selectedKey] = (T.loadByKey selectedKey, low(MonoTime))
+  table.loaded[selectedKey].access = getMonoTime()
+  table.loaded[selectedKey].value
 
 
 type TextData = distinct string
