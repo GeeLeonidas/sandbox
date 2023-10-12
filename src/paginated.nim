@@ -41,6 +41,8 @@ proc `[]`*[T: Loadable](table: var PaginatedTable[T], selectedKey: string): T =
     let newEntry = (T.loadByKey selectedKey, low(MonoTime))
     if table.size <= table.threshold:
       table.size += sizeof newEntry
+      table.size += sizeof selectedKey
+      table.size += selectedKey.len * sizeof char
     table.loaded[selectedKey] = newEntry
   table.loaded[selectedKey].access = getMonoTime()
   table.loaded[selectedKey].value
