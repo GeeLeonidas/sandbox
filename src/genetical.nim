@@ -1,4 +1,4 @@
-import std / [sequtils, random, sugar, algorithm, math]
+import std / [sequtils, random, sugar, algorithm]
 
 when isMainModule:
   randomize()
