@@ -10,8 +10,8 @@ when isMainModule:
     disp = rand ParamRange
     xVal = toSeq 1..100
     data = mapIt xVal:
-      let err = it.float * rand -0.01..0.01
-      it.float * coef + disp + err
+      let itWithError = it.float * (1.0 + rand -0.01..0.01)
+      itWithError * coef + disp
   echo coef, ' ', disp
   var
     bestA = 0.0
