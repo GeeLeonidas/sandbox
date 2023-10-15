@@ -1,9 +1,9 @@
 import std / [sequtils, random, sugar, algorithm, bitops, strformat]
 
 type Chromosome = distinct uint
+template value(x: Chromosome): uint {.dirty.} = x.uint
 
 {.push inline.}
-proc value(x: Chromosome): uint = x.uint
 proc asInt(x: Chromosome): int = cast[int](x.value)
 proc asFloat(x: Chromosome): float = cast[float](x.value)
 proc `$`(x: Chromosome): string = &"{$typeof x}({x.uint:#X})"
@@ -13,14 +13,13 @@ proc `~>`(x, y: Chromosome): (Chromosome, Chromosome) =
   const
     ChromosomeBits = 8 * sizeof Chromosome
     CrossoverBits = ChromosomeBits div 3
-    MaxBounds = ChromosomeBits - CrossoverBits
   let
     maskInner = block:
       var
         res = 0'u
         count = 0
       while count < CrossoverBits:
-        let bitIdx = rand 0..MaxBounds
+        let bitIdx = rand BitsRange[uint]
         if res.testBit(bitIdx):
           continue
         res.flipBit(bitIdx)
@@ -52,7 +51,7 @@ proc nextGeneration[S, N: static int](population: Population[S, N], score: array
       elif score[i+1] > score[i+2] and score[i+1] > score[i+3]:
         population[i+1]
       elif score[i+2] > score[i+3]:
-        population[i+2]:
+        population[i+2]
       else:
         population[i+3]
     result[i div 4] = fittest
@@ -60,9 +59,9 @@ proc nextGeneration[S, N: static int](population: Population[S, N], score: array
   for i in countup(0, (S div 4) - 2, 2):
     for j in 0..<N:
       let
-        childA, childB = result[i][j] ~> result[i+1][j]
-        childC, childD = result[i][j] ~> result[i+1][j]
-        childE, childF = result[i][j] ~> result[i+1][j]
+        (childA, childB) = result[i][j] ~> result[i+1][j]
+        (childC, childD) = result[i][j] ~> result[i+1][j]
+        (childE, childF) = result[i][j] ~> result[i+1][j]
         resIdx = (S div 4) + 3*i
       result[resIdx    ][j] = childA
       result[resIdx + 1][j] = childB
@@ -73,7 +72,8 @@ proc nextGeneration[S, N: static int](population: Population[S, N], score: array
   # Mutation phase
   for i in 0..<S:
     for j in 0..<N:
-      result[i][j].flipBit(rand BitsRange[Chromosome])
+      let bitIdx = rand BitsRange[uint]
+      result[i][j].value.flipBit(bitIdx)
 
 when isMainModule:
   randomize()
@@ -81,8 +81,10 @@ when isMainModule:
     ParamRange = -1e9..1e9
     PopSize    = 1000
     ChromNum   = 2
-  var population = initPopulation[PopSize, ChromNum]()
-  echo population
+  var
+    population = initPopulation[PopSize, ChromNum]()
+    score: array[PopSize, float]
+  echo population.nextGeneration(score)
   #[
   let
     coef = rand ParamRange
