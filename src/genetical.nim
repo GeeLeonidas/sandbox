@@ -43,6 +43,38 @@ proc initPopulation[S, N: static int]: Population[S, N] =
   for i in 0..<S:
     result[i] = initIndividual[N]()
 
+proc nextGeneration[S, N: static int](population: Population[S, N], score: array[S, SomeNumber]): Population[S, N] =
+  # Selection phase
+  for i in countup(0, S-4, 4):
+    let fittest =
+      if score[i] > score[i+1] and score[i] > score[i+2] and score[i] > score[i+3]:
+        population[i]
+      elif score[i+1] > score[i+2] and score[i+1] > score[i+3]:
+        population[i+1]
+      elif score[i+2] > score[i+3]:
+        population[i+2]:
+      else:
+        population[i+3]
+    result[i div 4] = fittest
+  # Crossover phase
+  for i in countup(0, (S div 4) - 2, 2):
+    for j in 0..<N:
+      let
+        childA, childB = result[i][j] ~> result[i+1][j]
+        childC, childD = result[i][j] ~> result[i+1][j]
+        childE, childF = result[i][j] ~> result[i+1][j]
+        resIdx = (S div 4) + 3*i
+      result[resIdx    ][j] = childA
+      result[resIdx + 1][j] = childB
+      result[resIdx + 2][j] = childC
+      result[resIdx + 3][j] = childD
+      result[resIdx + 4][j] = childE
+      result[resIdx + 5][j] = childF
+  # Mutation phase
+  for i in 0..<S:
+    for j in 0..<N:
+      result[i][j].flipBit(rand BitsRange[Chromosome])
+
 when isMainModule:
   randomize()
   const
