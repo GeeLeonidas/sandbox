@@ -1,4 +1,4 @@
-import std / [sequtils, random, sugar, algorithm, bitops, strformat]
+import std / [sequtils, random, sugar, algorithm, bitops, strformat, math]
 
 type Chromosome = distinct uint
 template value(x: Chromosome): uint {.dirty.} = x.uint
@@ -77,15 +77,7 @@ proc nextGeneration[S, N: static int](population: Population[S, N], score: array
 
 when isMainModule:
   randomize()
-  const
-    ParamRange = -1e9..1e9
-    PopSize    = 1000
-    ChromNum   = 2
-  var
-    population = initPopulation[PopSize, ChromNum]()
-    score: array[PopSize, float]
-  echo population.nextGeneration(score)
-  #[
+  const ParamRange = -1e9..1e9
   let
     coef = rand ParamRange
     disp = rand ParamRange
@@ -94,30 +86,40 @@ when isMainModule:
       let itWithError = it.float * (1.0 + rand -0.01..0.01)
       itWithError * coef + disp
   echo coef, ' ', disp
+  const
+    PopSize    = 1000
+    ChromNum   = 2
   var
-    bestA = 0.0
-    bestB = 0.0
-    bestL = 2 * max(ParamRange.a, ParamRange.b)
-  for epoch in 1..100:
-    let
-      population = collect:
-        for n in 1..PopSize:
-          let
-            a = gauss(bestA, bestL)
-            b = gauss(bestB, bestL)
-            predict = mapIt xVal:
-              it.float * a + b
-            loss = block:
-              let diff = collect:
-                for i in 0..<data.len:
-                  max(data[i], predict[i]) - min(data[i], predict[i])
-              diff.foldl(a + b) / data.len.float
-          (a: a, b: b, l: loss)
-      sortedPop = population.sortedByIt(it.l)
-    if sortedPop[0].l < bestL:
-      bestA = sortedPop[0].a
-      bestB = sortedPop[0].b
-      bestL = sortedPop[0].l
-  echo bestL
-  echo bestA, ' ', bestB
-  ]#
+    population = initPopulation[PopSize, ChromNum]()
+    score: array[PopSize, float]
+  proc updateScore = 
+    for i in 0..<PopSize:
+      let
+        ind = population[i]
+        a = ind[0].asFloat
+        b = ind[1].asFloat
+      if a.isNaN or b.isNaN or a notin ParamRange or b notin ParamRange:
+        score[i] = -1
+        continue
+      let
+        predict = mapIt xVal:
+          it.float * a + b
+        loss = block:
+          let diff = collect:
+            for i in 0..<data.len:
+              max(data[i], predict[i]) - min(data[i], predict[i])
+          diff.foldl(a + b) / data.len.float
+      score[i] = 1 / loss
+  for epoch in 1..1000:
+    updateScore()
+    population = population.nextGeneration(score)
+  updateScore()
+  var
+    fittestIdx = 0
+    fittestScore = score[0]
+  for i in 1..<PopSize:
+    if fittestScore > score[i]:
+      fittestIdx = i
+      fittestScore = score[i]
+  echo fittestScore
+  echo population[fittestIdx][0].asFloat, ' ', population[fittestIdx][1].asFloat
