@@ -1,6 +1,6 @@
 import std / [sequtils, random, sugar, algorithm, bitops, strformat, math]
 
-type Chromosome = distinct uint
+type Chromosome = distinct uint # TODO: ditch bitset approach
 template value(x: Chromosome): uint {.dirty.} = x.uint
 
 {.push inline.}
