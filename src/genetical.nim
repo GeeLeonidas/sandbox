@@ -60,7 +60,8 @@ proc fitness(ind: string; input, expected: openArray[float]; considerParsimony =
       maxExecSize = execSize
   result = 1000 / (1 + sqrt(sumError) / input.len.float)
   if considerParsimony:
-    result += 1e-4 * ind.len.float / maxExecSize.float
+    result += 1e-2 / maxExecSize.float
+    # TODO: consider median execution time
 
 proc sortElite(population: var openArray[string], score: var openArray[float]) =
   var eliteIdx = 0
