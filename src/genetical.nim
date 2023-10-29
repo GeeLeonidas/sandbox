@@ -46,7 +46,8 @@ proc mutateGene(gene: string, headSize: int; rate = 2 / gene.len): string =
     for idx in headSize..<gene.len:
       if rate >= rand 1.0:
         result[idx] = sample(@ValidVars.filterIt(it != result[idx]))
-  
+
+# FIXME: score value is too generous
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
     sumError = 0.0
