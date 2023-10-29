@@ -102,6 +102,10 @@ proc applyISTransposition(gene: string, headSize: int; rate = 0.1): string =
         break
       result[resIdx] = gene[idx]
 
+proc applyRootTransposition(gene: string, headSize: int; rate = 0.1): string =
+  result = gene
+  # TODO: RIS transposition implementation
+
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
     sumError = 0.0
@@ -192,6 +196,7 @@ when isMainModule:
       population[idx] = applyMutation(population[idx], HeadSize)
       population[idx] = applyInversion(population[idx], HeadSize)
       population[idx] = applyISTransposition(population[idx], HeadSize)
+      population[idx] = applyRootTransposition(population[idx], HeadSize)
 
     score = collect:
       for idx in 0..<population.len:
