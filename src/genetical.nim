@@ -67,7 +67,7 @@ proc evalGene(gene: string, input: varargs[float]): (string, float) =
         raise newException(ValueError, "Unimplemented unary operator `" & gene[0] & '`')
   return (gene.substr(1), input[Terminals.find(gene[0])])
 
-proc mutateGene(gene: string, headSize: int; rate = 2 / gene.len): string =
+proc applyMutation(gene: string, headSize: int; rate = 2 / gene.len): string =
   result = gene
   let opsAndTerminals = concatAllSymbols()
   if opsAndTerminals.len > 1:
@@ -79,7 +79,7 @@ proc mutateGene(gene: string, headSize: int; rate = 2 / gene.len): string =
       if rate >= rand 1.0:
         result[idx] = sample(@Terminals.filterIt(it != result[idx]))
 
-proc invertGene(gene: string, headSize: int; rate = 0.1): string =
+proc applyInversion(gene: string, headSize: int; rate = 0.1): string =
   result = gene
   if rate >= rand 1.0:
     let
@@ -176,8 +176,8 @@ when isMainModule:
     population = rouletteSelection(population, score)
 
     for idx in 1..<population.len:
-      population[idx] = mutateGene(population[idx], HeadSize)
-      population[idx] = invertGene(population[idx], HeadSize)
+      population[idx] = applyMutation(population[idx], HeadSize)
+      population[idx] = applyInversion(population[idx], HeadSize)
 
     score = collect:
       for idx in 0..<population.len:
