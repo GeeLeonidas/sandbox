@@ -47,7 +47,6 @@ proc mutateGene(gene: string, headSize: int; rate = 2 / gene.len): string =
       if rate >= rand 1.0:
         result[idx] = sample(@ValidVars.filterIt(it != result[idx]))
 
-# FIXME: score value is too generous
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
     sumError = 0.0
@@ -59,7 +58,7 @@ proc fitness(ind: string; input, expected: openArray[float]; considerParsimony =
     let execSize = ind.len - remains.len
     if maxExecSize < execSize:
       maxExecSize = execSize
-  result = 1000 / (1 + round(sqrt(sumError)))
+  result = 1000 / (1 + sqrt(sumError) / input.len.float)
   if considerParsimony:
     result += 1e-4 * ind.len.float / maxExecSize.float
 
