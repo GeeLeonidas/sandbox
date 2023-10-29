@@ -15,6 +15,11 @@ proc concatAllSymbols: seq[char] =
   when TernaryOps.len > 0:
     result = result.concat(@TernaryOps)
 
+template isOperator(symbol: char): bool =
+  (when TernaryOps.len > 0: symbol in TernaryOps else: false) or
+  (when BinaryOps.len > 0: symbol in BinaryOps else: false) or
+  (when UnaryOps.len > 0: symbol in UnaryOps else: false)
+
 template getMaxParamCount: Natural =
   when TernaryOps.len > 0:
     3
