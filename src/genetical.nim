@@ -93,14 +93,13 @@ proc applyISTransposition(gene: string, headSize: int; rate = 0.1): string =
   result = gene
   if rate >= rand 1.0:
     let
-      transposonBegin = rand 0..<gene.len
-      transposonEnd = rand transposonBegin..<gene.len
-      targetIdx = rand 0..<headSize
-    for idx in transposonBegin..transposonEnd:
-      let resIdx = targetIdx + idx - transposonBegin
-      if resIdx >= gene.len:
-        break
-      result[resIdx] = gene[idx]
+      transposonSize = rand 1..<headSize
+      transposonBegin = rand 0..<gene.len-transposonSize
+      transposonEnd = transposonBegin + transposonSize - 1
+      targetIdx = rand 1..headSize-transposonSize
+    var newHead = gene[0..<headSize]
+    newHead.insert(gene[transposonBegin..transposonEnd], targetIdx)
+    result = newHead[0..<headSize] & gene[headSize..<gene.len]
 
 proc applyRootTransposition(gene: string, headSize: int; rate = 0.1): string =
   result = gene
