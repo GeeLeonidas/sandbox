@@ -15,7 +15,17 @@ proc concatAllSymbols: seq[char] =
   when TernaryOps.len > 0:
     result = result.concat(@TernaryOps)
 
-proc initGene(headSize: Positive; maxParamCount = 2.Positive): string =
+template getMaxParamCount: Natural =
+  when TernaryOps.len > 0:
+    3
+  elif BinaryOps.len > 0:
+    2
+  elif UnaryOps.len > 0:
+    1
+  else:
+    0
+
+proc initGene(headSize: Positive; maxParamCount = getMaxParamCount()): string =
   let opsAndTerminals = concatAllSymbols()
   for _ in 1..headSize:
     result.add sample(opsAndTerminals)
