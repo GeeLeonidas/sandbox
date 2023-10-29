@@ -144,3 +144,8 @@ when isMainModule:
     echo "Elite score: ", score[0]
     echo "\nBest individual"
     echo population[0]
+    let
+      chosenIdx = rand 0..<xValues.len
+      (_, predicted) = evalGene(population[0], xValues[chosenIdx])
+    echo "Predicted:   ", predicted
+    echo "Expected:    ", yValues[chosenIdx]
