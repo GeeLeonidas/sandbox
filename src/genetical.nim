@@ -108,7 +108,21 @@ proc applyISTransposition(gene: string, headSize: int; rate = 0.1): string =
 
 proc applyRootTransposition(gene: string, headSize: int; rate = 0.1): string =
   result = gene
-  # TODO: RIS transposition implementation
+  if rate >= rand 1.0:
+    let
+      chosenIdx = rand 0..<headSize
+      transposonBegin = block:
+        var res = chosenIdx
+        for _ in chosenIdx..<headSize:
+          if gene[res].isOperator():
+            break
+          inc res
+        if res == headSize:
+          return
+        res
+      transposonEnd = rand transposonBegin..<headSize
+      newHead = gene[transposonBegin..transposonEnd] & gene[0..<headSize]
+    result = newHead[0..<headSize] & gene[headSize..<gene.len]
 
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
