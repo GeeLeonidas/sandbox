@@ -89,6 +89,19 @@ proc applyInversion(gene: string, headSize: int; rate = 0.1): string =
       let invIdx = inversionEnd - idx + inversionBegin
       result[idx] = gene[invIdx]
 
+proc applyISTransposition(gene: string, headSize: int; rate = 0.1): string =
+  result = gene
+  if rate >= rand 1.0:
+    let
+      transposonBegin = rand 0..<gene.len
+      transposonEnd = rand transposonBegin..<gene.len
+      targetIdx = rand 0..<headSize
+    for idx in transposonBegin..transposonEnd:
+      let resIdx = targetIdx + idx - transposonBegin
+      if resIdx >= gene.len:
+        break
+      result[resIdx] = gene[idx]
+
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
     sumError = 0.0
@@ -178,6 +191,7 @@ when isMainModule:
     for idx in 1..<population.len:
       population[idx] = applyMutation(population[idx], HeadSize)
       population[idx] = applyInversion(population[idx], HeadSize)
+      population[idx] = applyISTransposition(population[idx], HeadSize)
 
     score = collect:
       for idx in 0..<population.len:
