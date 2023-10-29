@@ -69,6 +69,16 @@ proc mutateGene(gene: string, headSize: int; rate = 2 / gene.len): string =
       if rate >= rand 1.0:
         result[idx] = sample(@Terminals.filterIt(it != result[idx]))
 
+proc invertGene(gene: string, headSize: int; rate = 0.1): string =
+  result = gene
+  if rate >= rand 1.0:
+    let
+      inversionBegin = rand 0..<headSize-1
+      inversionEnd = rand inversionBegin+1..<headSize
+    for idx in inversionBegin..inversionEnd:
+      let invIdx = inversionEnd - idx + inversionBegin
+      result[idx] = gene[invIdx]
+
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
     sumError = 0.0
@@ -157,6 +167,7 @@ when isMainModule:
 
     for idx in 1..<population.len:
       population[idx] = mutateGene(population[idx], HeadSize)
+      population[idx] = invertGene(population[idx], HeadSize)
 
     score = collect:
       for idx in 0..<population.len:
