@@ -197,12 +197,12 @@ when isMainModule:
       for idx in 0..<population.len:
         fitness(population[idx], xValues, yValues, score[0] > 999.5)
     echo "\nGen ", epoch
-    echo "Avg.  score: ", sum(score) / population.len.float
-    echo "Elite score: ", score[0]
-    echo "\nBest individual"
-    echo population[0]
+    echo "  Avg.  score: ", sum(score) / population.len.float
+    echo "  Elite score: ", score[0]
+    echo "Best individual"
+    echo "  ", population[0]
     let
       chosenIdx = rand 0..<xValues.len
       (_, predicted) = evalGene(population[0], xValues[chosenIdx])
-    echo "Predicted:   ", predicted
-    echo "Expected:    ", yValues[chosenIdx]
+    echo "  Predicted:   ", predicted
+    echo "  Expected:    ", yValues[chosenIdx]
