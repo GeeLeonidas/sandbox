@@ -124,6 +124,22 @@ proc applyRootTransposition(gene: string, headSize: int; rate = 0.1): string =
       newHead = gene[transposonBegin..transposonEnd] & gene[0..<headSize]
     result = newHead[0..<headSize] & gene[headSize..<gene.len]
 
+proc onePointRecombination(geneOne, geneTwo: string; rate = 0.3): (string, string) =
+  result = (geneOne, geneTwo)
+  if rate >= rand 1.0:
+    let chosenIdx = rand 1..<geneOne.len
+    result[0] = geneOne[0..<chosenIdx] & geneTwo[chosenIdx..<geneTwo.len]
+    result[1] = geneTwo[0..<chosenIdx] & geneOne[chosenIdx..<geneOne.len]
+
+proc twoPointRecombination(geneOne, geneTwo: string; rate = 0.3): (string, string) =
+  result = (geneOne, geneTwo)
+  if rate >= rand 1.0:
+    let
+      segmentBegin = rand 0..<geneOne.len
+      segmentEnd = rand segmentBegin..<geneOne.len
+    result[0] = geneTwo[0..<segmentBegin] & geneOne[segmentBegin..segmentEnd] & geneTwo[segmentEnd+1..<geneTwo.len]
+    result[1] = geneOne[0..<segmentBegin] & geneTwo[segmentBegin..segmentEnd] & geneOne[segmentEnd+1..<geneOne.len]
+
 proc fitness(ind: string; input, expected: openArray[float]; considerParsimony = false): float =
   var
     sumError = 0.0
@@ -215,6 +231,16 @@ when isMainModule:
       population[idx] = applyInversion(population[idx], HeadSize)
       population[idx] = applyISTransposition(population[idx], HeadSize)
       population[idx] = applyRootTransposition(population[idx], HeadSize)
+    
+    let elite = population[0]
+    for idx in 0..<population.len:
+      for jdx in idx+1..<population.len:
+        let
+          (childOne, childTwo) = onePointRecombination(population[idx], population[jdx])
+          (parentOne, parentTwo) = if (rand 0..1).bool: (idx, jdx) else: (jdx, idx)
+        population[parentOne] = childOne
+        population[parentTwo] = childTwo
+    population[0] = elite
 
     score = collect:
       for idx in 0..<population.len:
