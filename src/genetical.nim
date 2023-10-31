@@ -196,62 +196,82 @@ when isMainModule:
   const
     HeadSize = 14
     SelectiontRange = 100
+    EpochCount = 50
+    RunCount = 40
 
   randomize()
 
   let
     xValues = collect:
       for _ in 1..20:
-        rand 4.0..100.0
+        rand 0.01..6.0
     yValues = mapIt xValues:
-      pow(it, 2) + 2 * it
+      1 / sqrt(it)
 
   var
-    population = collect:
-      for _ in 1..30:
-        initGene(HeadSize)
-    score = collect:
+    successCount = 0
+    allTimeBestInd = ""
+    allTimeBestScore = 0.0
+
+  for run in 1..RunCount:
+    var
+      population = collect:
+        for _ in 1..30:
+          initGene(HeadSize)
+      score = collect:
+        for idx in 0..<population.len:
+          fitness(population[idx], xValues, yValues)
+
+    while allIt(score, it <= SelectiontRange):
+      population = collect:
+        for _ in 1..30:
+          initGene(HeadSize)
+      score = collect:
+        for idx in 0..<population.len:
+          fitness(population[idx], xValues, yValues)
+
+    for epoch in 1..EpochCount:
+      sortElite(population, score)
+      population = rouletteSelection(population, score)
+
+      for idx in 1..<population.len:
+        population[idx] = applyMutation(population[idx], HeadSize)
+        population[idx] = applyInversion(population[idx], HeadSize)
+        population[idx] = applyISTransposition(population[idx], HeadSize)
+        population[idx] = applyRootTransposition(population[idx], HeadSize)
+      
+      let elite = population[0]
       for idx in 0..<population.len:
-        fitness(population[idx], xValues, yValues)
+        for jdx in idx+1..<population.len:
+          let
+            (childOne, childTwo) = onePointRecombination(population[idx], population[jdx])
+            (parentOne, parentTwo) = if (rand 0..1).bool: (idx, jdx) else: (jdx, idx)
+          population[parentOne] = childOne
+          population[parentTwo] = childTwo
+      population[0] = elite
 
-  while allIt(score, it <= SelectiontRange):
-    population = collect:
-      for _ in 1..30:
-        initGene(HeadSize)
-    score = collect:
-      for idx in 0..<population.len:
-        fitness(population[idx], xValues, yValues)
-
-  for epoch in 1..100:
-    sortElite(population, score)
-    population = rouletteSelection(population, score)
-
-    for idx in 1..<population.len:
-      population[idx] = applyMutation(population[idx], HeadSize)
-      population[idx] = applyInversion(population[idx], HeadSize)
-      population[idx] = applyISTransposition(population[idx], HeadSize)
-      population[idx] = applyRootTransposition(population[idx], HeadSize)
+      score = collect:
+        for idx in 0..<population.len:
+          fitness(population[idx], xValues, yValues, score[0] > 999.5)
+      echo "\nRun ", run, " - Gen ", epoch
+      echo "  Avg.  score: ", sum(score) / population.len.float
+      echo "  Elite score: ", score[0]
+      echo "Best individual"
+      echo "  ", population[0]
+      let
+        chosenIdx = rand 0..<xValues.len
+        (_, predicted) = evalGene(population[0], xValues[chosenIdx])
+      echo "  Predicted:   ", predicted
+      echo "  Expected:    ", yValues[chosenIdx]
     
-    let elite = population[0]
-    for idx in 0..<population.len:
-      for jdx in idx+1..<population.len:
-        let
-          (childOne, childTwo) = onePointRecombination(population[idx], population[jdx])
-          (parentOne, parentTwo) = if (rand 0..1).bool: (idx, jdx) else: (jdx, idx)
-        population[parentOne] = childOne
-        population[parentTwo] = childTwo
-    population[0] = elite
-
-    score = collect:
-      for idx in 0..<population.len:
-        fitness(population[idx], xValues, yValues, score[0] > 999.5)
-    echo "\nGen ", epoch
-    echo "  Avg.  score: ", sum(score) / population.len.float
-    echo "  Elite score: ", score[0]
-    echo "Best individual"
-    echo "  ", population[0]
-    let
-      chosenIdx = rand 0..<xValues.len
-      (_, predicted) = evalGene(population[0], xValues[chosenIdx])
-    echo "  Predicted:   ", predicted
-    echo "  Expected:    ", yValues[chosenIdx]
+    if score[0] > allTimeBestScore:
+      allTimeBestScore = score[0]
+      allTimeBestInd = population[0]
+    if score[0] > 999.5:
+      inc successCount
+  
+  echo "\nSummary"
+  echo "  Success rate: ", round(100.0 * successCount.float / RunCount).int, '%'
+  echo "All-time best individual"
+  echo "  ", allTimeBestInd
+  echo "  Score:        ", allTimeBestScore
