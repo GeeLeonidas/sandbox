@@ -151,7 +151,7 @@ proc fitness(ind: string; input, expected: openArray[float]; considerParsimony =
     let execSize = ind.len - remains.len
     if maxExecSize < execSize:
       maxExecSize = execSize
-  result = 1000 / (1 + sqrt(sumError) / input.len.float)
+  result = 1000 / (1 + sumError / input.len.float)
   if considerParsimony:
     result += 1e-2 / maxExecSize.float
     # TODO: consider median execution time
